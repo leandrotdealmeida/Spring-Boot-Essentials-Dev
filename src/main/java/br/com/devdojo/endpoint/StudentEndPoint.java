@@ -18,7 +18,7 @@ import javax.validation.Valid;
 
 
 @RestController
-@RequestMapping("students")
+@RequestMapping("v1")
 public class StudentEndPoint {
 
     private final StudentRepository studentDAO;
@@ -28,13 +28,13 @@ public class StudentEndPoint {
         this.studentDAO = studentDAO;
     }
 
-    @GetMapping
+    @GetMapping(path = "protected/students/")
     public ResponseEntity<?> listAll(Pageable pageable) {
 
         return new ResponseEntity<>(studentDAO.findAll(pageable), HttpStatus.OK);
     }
 
-    @GetMapping(path = "/{id}")
+    @GetMapping(path = "protected/students/{id}")
     public ResponseEntity<?> getStudentById(@PathVariable("id") Long id, @AuthenticationPrincipal UserDetails userDetails) {
         System.out.println(userDetails);
         verifyIfStudentsExistits(id);
@@ -42,12 +42,12 @@ public class StudentEndPoint {
         return new ResponseEntity<>(student, HttpStatus.OK);
     }
 
-    @GetMapping(path = "/findByName/{name}")
+    @GetMapping(path = "protected/students/findByName/{name}")
     public ResponseEntity<?> findStudentByName(@PathVariable String name) {
         return new ResponseEntity<>(studentDAO.findByNameIgnoreCaseContaining(name), HttpStatus.OK);
     }
 
-    @PostMapping
+    @PostMapping(path = "admin/students")
     @Transactional(rollbackFor = Exception.class)
     public ResponseEntity<?> save(@Valid @RequestBody Student student) {
        /* studentDAO.save(student);
@@ -59,15 +59,15 @@ public class StudentEndPoint {
         return new ResponseEntity<>(studentDAO.save(student), HttpStatus.CREATED);
     }
 
-    @DeleteMapping(path = "/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping(path = "admin/students/{id}")
+  //  @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         verifyIfStudentsExistits(id);
         studentDAO.deleteById(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PutMapping
+    @PutMapping(path = "admin/students")
     public ResponseEntity<?> update(@RequestBody Student student) {
         verifyIfStudentsExistits(student.getId());
         studentDAO.save(student);
